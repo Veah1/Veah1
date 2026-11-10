@@ -1,11 +1,11 @@
 // Initialize Supabase Client (Replace placeholders with your actual Supabase Project URL and Anon Key)
 const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y';
-const supabase = window.supabase? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+const supabaseClient = window.supabase? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 // Run initial checks when page loads
 window.addEventListener('DOMContentLoaded', () => {
-  if (supabase) {
+  if (supabaseClient) {
     fetchRequests();
     checkUserSession();
   }
