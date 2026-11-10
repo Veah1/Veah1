@@ -1,9 +1,9 @@
-// Initialize Supabase Client (Replace with your actual Supabase URL and Anon Key)
-const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
-const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+// Initialize Supabase Client (Replace placeholders with your actual Supabase Project URL and Anon Key)
+const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y';
+const supabase = window.supabase? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-// Fetch existing requests on page load if database is connected
+// Run initial checks when page loads
 window.addEventListener('DOMContentLoaded', () => {
   if (supabase) {
     fetchRequests();
@@ -11,7 +11,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 1. Tab Switching Function (Fixes "switchTab is not defined")
+// 1. Tab Switching Function
 function switchTab(tabId, btnId) {
   document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -47,7 +47,6 @@ async function handleFormSubmit(event, type, alertId) {
     details = document.getElementById('details').value;
   }
 
-  // If Supabase is connected, save to database
   if (supabase) {
     const { error } = await supabase.from('requests').insert([
       {
@@ -67,7 +66,6 @@ async function handleFormSubmit(event, type, alertId) {
     }
     fetchRequests();
   } else {
-    // Fallback local update if Supabase isn't configured yet
     addLocalTrackerCard(reqId, type, locationOrFacility, 'Pending Review', details);
   }
 
@@ -118,7 +116,7 @@ async function fetchRequests() {
   });
 }
 
-// Fallback local card appender if offline/testing
+// Fallback card appender if offline
 function addLocalTrackerCard(reqId, type, locationOrFacility, status, details) {
   const trackerList = document.getElementById('tracker-list');
   if (!trackerList) return;
@@ -149,7 +147,7 @@ async function handleSignUp(event) {
   const password = document.getElementById('signup-password').value;
   const alertBox = document.getElementById('signup-alert');
 
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { error } = await supabase.auth.signUp({ email, password });
 
   if (error) {
     alert('Sign up error: ' + error.message);
@@ -158,6 +156,10 @@ async function handleSignUp(event) {
 
   if (alertBox) alertBox.style.display = 'block';
   event.target.reset();
+
+  setTimeout(() => {
+    if (alertBox) alertBox.style.display = 'none';
+  }, 4000);
 }
 
 // 5. Supabase Log In Authentication
@@ -172,7 +174,7 @@ async function handleLogin(event) {
   const password = document.getElementById('login-password').value;
   const alertBox = document.getElementById('login-alert');
 
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     alert('Log in error: ' + error.message);
