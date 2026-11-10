@@ -1,3 +1,11 @@
+// Initialize Supabase Client
+const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Fetch existing requests on page load
+window.addEventListener('DOMContentLoaded', fetchRequests);
+
 function switchTab(tabId, btnId) {
   document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -11,31 +19,24 @@ function switchTab(tabId, btnId) {
   activeBtn.setAttribute('aria-selected', 'true');
 }
 
-function handleFormSubmit(event, type, alertId) {
+// Handle User Sign Up
+async function handleSignUp(event) {
   event.preventDefault();
+  const email = document.getElementById('signup-email').value;
+  const password = document.getElementById('signup-password').value;
+  const role = document.getElementById('user-role').value;
+  const alertBox = document.getElementById('auth-alert');
 
-  const alertBox = document.getElementById(alertId);
-  alertBox.style.display = 'block';
+  const { data, error } = await supabase.auth.signUp({
+    email: email,
+    password: password,
+    options: {
+      data: {
+        account_type: role
+      }
+    }
+  });
 
-  const reqId = 'REQ-' + Math.floor(1000 + Math.random() * 9000);
-  const trackerList = document.getElementById('tracker-list');
-
-  const newCard = document.createElement('div');
-  newCard.className = 'status-card';
-  newCard.innerHTML = `
-    <div class="status-header">
-      <span class="status-id">${reqId}</span>
-      <span class="badge badge-pending">Pending Review</span>
-    </div>
-    <strong class="card-title">${type}</strong>
-    <p class="card-sub">Status: Submitted just now</p>
-    <p class="card-meta"><em>Status Update: Successfully logged into routing network.</em></p>
-  `;
-
-  trackerList.prepend(newCard);
-  event.target.reset();
-
-  setTimeout(() => {
-    alertBox.style.display = 'none';
-  }, 4000);
-}
+  if (error) {
+    alertBox.style.display = 'block';
+    alertBox.style.backgroundColor =
