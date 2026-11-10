@@ -18,7 +18,7 @@
     <button class="nav-btn active" role="tab" aria-selected="true" aria-controls="public-tab" id="tab-1" onclick="switchTab('public-tab', 'tab-1')">Public Outreach Form</button>
     <button class="nav-btn" role="tab" aria-selected="false" aria-controls="shelter-tab" id="tab-2" onclick="switchTab('shelter-tab', 'tab-2')">Shelter Staff Portal</button>
     <button class="nav-btn" role="tab" aria-selected="false" aria-controls="tracker-tab" id="tab-3" onclick="switchTab('tracker-tab', 'tab-3')">Status Tracker</button>
-    <button class="nav-btn" role="tab" aria-selected="false" aria-controls="auth-tab" id="tab-4" onclick="switchTab('auth-tab', 'tab-4')">Sign In / Sign Up</button>
+    <button class="nav-btn" role="tab" aria-selected="false" aria-controls="auth-tab" id="tab-4" onclick="switchTab('auth-tab', 'tab-4')">Log In / Sign Up</button>
   </nav>
 
   <main>
@@ -121,20 +121,19 @@
       </div>
     </section>
 
-    <!-- TAB 4: Authentication (Sign In & Sign Up) -->
+    <!-- TAB 4: Log In / Sign Up Portal -->
     <section id="auth-tab" class="tab-content" role="tabpanel" aria-labelledby="tab-4">
-      <h2>User Authentication</h2>
-      <p class="section-desc">Sign in or create an account to manage shelter credentials and track individual submissions.</p>
+      <div id="auth-forms-container">
+        <!-- Log In Form -->
+        <h2>Log In to Your Account</h2>
+        <p class="section-desc">Access authorized shelter management and response features.</p>
+        
+        <div id="login-alert" class="alert-success" role="alert">Logged in successfully!</div>
 
-      <div id="auth-alert" class="alert-success" role="alert"></div>
-
-      <!-- Sign In Form -->
-      <div class="auth-card" style="margin-bottom: 2rem;">
-        <h3>Sign In</h3>
         <form id="login-form" onsubmit="handleLogin(event)">
           <div class="form-group">
             <label for="login-email">Email Address *</label>
-            <input type="email" id="login-email" required placeholder="name@shelter.org">
+            <input type="email" id="login-email" required placeholder="name@organization.org">
           </div>
 
           <div class="form-group">
@@ -142,39 +141,39 @@
             <input type="password" id="login-password" required placeholder="••••••••">
           </div>
 
-          <button type="submit" class="btn-submit">Sign In</button>
+          <button type="submit" class="btn-submit">Log In</button>
         </form>
-      </div>
 
-      <hr style="margin-bottom: 2rem; border: 0; border-top: 1px solid var(--border);">
+        <hr style="margin: 2rem 0; border: 0; border-top: 1px solid var(--border);">
 
-      <!-- Sign Up Form -->
-      <div class="auth-card">
-        <h3>Create an Account</h3>
+        <!-- Sign Up Form -->
+        <h2>Create a New Account</h2>
+        <p class="section-desc">Register as a shelter staff member, case manager, or outreach partner.</p>
+        
+        <div id="signup-alert" class="alert-success" role="alert">Account created! Check your email to confirm registration.</div>
+
         <form id="signup-form" onsubmit="handleSignUp(event)">
           <div class="form-group">
             <label for="signup-email">Email Address *</label>
-            <input type="email" id="signup-email" required placeholder="name@shelter.org">
+            <input type="email" id="signup-email" required placeholder="name@organization.org">
           </div>
 
           <div class="form-group">
             <label for="signup-password">Password *</label>
-            <input type="password" id="signup-password" required minlength="6" placeholder="At least 6 characters">
+            <input type="password" id="signup-password" required placeholder="At least 6 characters">
           </div>
 
-          <div class="form-group">
-            <label for="user-role">Account Type *</label>
-            <select id="user-role" required>
-              <option value="Community Member">Community Member / Referrer</option>
-              <option value="Shelter Staff">Shelter Staff / Case Manager</option>
-            </select>
-          </div>
-
-          <button type="submit" class="btn-submit" style="background-color: var(--secondary);">Register Account</button>
+          <button type="submit" class="btn-submit" style="background-color: var(--secondary);">Sign Up</button>
         </form>
       </div>
-    </section>
 
+      <!-- Account Details (Hidden until logged in) -->
+      <div id="user-profile" style="display: none;">
+        <h2>Welcome, <span id="user-email-display"></span></h2>
+        <p class="section-desc">You are currently logged in.</p>
+        <button type="button" class="btn-submit" onclick="handleLogout()" style="background-color: #DC2626;">Log Out</button>
+      </div>
+    </section>
   </main>
 
   <script src="script.log.js"></script>
