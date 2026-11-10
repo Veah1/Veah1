@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shelter & Outreach Coordination Network</title>
@@ -17,6 +18,7 @@
     <button class="nav-btn active" role="tab" aria-selected="true" aria-controls="public-tab" id="tab-1" onclick="switchTab('public-tab', 'tab-1')">Public Outreach Form</button>
     <button class="nav-btn" role="tab" aria-selected="false" aria-controls="shelter-tab" id="tab-2" onclick="switchTab('shelter-tab', 'tab-2')">Shelter Staff Portal</button>
     <button class="nav-btn" role="tab" aria-selected="false" aria-controls="tracker-tab" id="tab-3" onclick="switchTab('tracker-tab', 'tab-3')">Status Tracker</button>
+    <button class="nav-btn" role="tab" aria-selected="false" aria-controls="auth-tab" id="tab-4" onclick="switchTab('auth-tab', 'tab-4')">Sign In / Sign Up</button>
   </nav>
 
   <main>
@@ -118,6 +120,61 @@
         </div>
       </div>
     </section>
+
+    <!-- TAB 4: Authentication (Sign In & Sign Up) -->
+    <section id="auth-tab" class="tab-content" role="tabpanel" aria-labelledby="tab-4">
+      <h2>User Authentication</h2>
+      <p class="section-desc">Sign in or create an account to manage shelter credentials and track individual submissions.</p>
+
+      <div id="auth-alert" class="alert-success" role="alert"></div>
+
+      <!-- Sign In Form -->
+      <div class="auth-card" style="margin-bottom: 2rem;">
+        <h3>Sign In</h3>
+        <form id="login-form" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="login-email">Email Address *</label>
+            <input type="email" id="login-email" required placeholder="name@shelter.org">
+          </div>
+
+          <div class="form-group">
+            <label for="login-password">Password *</label>
+            <input type="password" id="login-password" required placeholder="••••••••">
+          </div>
+
+          <button type="submit" class="btn-submit">Sign In</button>
+        </form>
+      </div>
+
+      <hr style="margin-bottom: 2rem; border: 0; border-top: 1px solid var(--border);">
+
+      <!-- Sign Up Form -->
+      <div class="auth-card">
+        <h3>Create an Account</h3>
+        <form id="signup-form" onsubmit="handleSignUp(event)">
+          <div class="form-group">
+            <label for="signup-email">Email Address *</label>
+            <input type="email" id="signup-email" required placeholder="name@shelter.org">
+          </div>
+
+          <div class="form-group">
+            <label for="signup-password">Password *</label>
+            <input type="password" id="signup-password" required minlength="6" placeholder="At least 6 characters">
+          </div>
+
+          <div class="form-group">
+            <label for="user-role">Account Type *</label>
+            <select id="user-role" required>
+              <option value="Community Member">Community Member / Referrer</option>
+              <option value="Shelter Staff">Shelter Staff / Case Manager</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-submit" style="background-color: var(--secondary);">Register Account</button>
+        </form>
+      </div>
+    </section>
+
   </main>
 
   <script src="script.log.js"></script>
