@@ -1,17 +1,29 @@
-// Initialize Supabase Client (Replace placeholders with your actual Supabase Project URL and Anon Key)
-const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y';
-const supabaseClient = window.supabase? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+// 1. Safe Supabase Initialization
+const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co'; // Replace with your actual project URL
+const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y '; // Replace with your actual anon key
+
+let supabase = null;
+
+// Only initialize if window.supabase exists and user replaced the placeholder keys
+if (window.supabase && SUPABASE_URL && SUPABASE_URL !== 'YOUR_SUPABASE_URL_HERE') {
+  try {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } catch (err) {
+    console.warn('Supabase initialization error:', err);
+  }
+}
 
 // Run initial checks when page loads
 window.addEventListener('DOMContentLoaded', () => {
-  if (supabaseClient) {
+  if (supabase) {
     fetchRequests();
     checkUserSession();
+  } else {
+    console.log('Running in local demo mode (Supabase not configured yet).');
   }
 });
 
-// 1. Tab Switching Function
+// 2. Tab Switching Function
 function switchTab(tabId, btnId) {
   document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -29,7 +41,7 @@ function switchTab(tabId, btnId) {
   }
 }
 
-// 2. Form Submission Handler (Public Outreach & Shelter Portals)
+// 3. Form Submission Handler (Public Outreach & Shelter Portals)
 async function handleFormSubmit(event, type, alertId) {
   event.preventDefault();
 
@@ -61,11 +73,12 @@ async function handleFormSubmit(event, type, alertId) {
 
     if (error) {
       console.error('Error inserting data:', error);
-      alert('There was an error submitting your request. Please try again.');
+      alert('There was an error saving to Supabase: ' + error.message);
       return;
     }
     fetchRequests();
   } else {
+    // Fallback local UI update if Supabase isn't hooked up yet
     addLocalTrackerCard(reqId, type, locationOrFacility, 'Pending Review', details);
   }
 
@@ -77,7 +90,7 @@ async function handleFormSubmit(event, type, alertId) {
   }, 4000);
 }
 
-// 3. Fetch Requests from Supabase
+// 4. Fetch Requests from Supabase
 async function fetchRequests() {
   if (!supabase) return;
 
@@ -116,7 +129,7 @@ async function fetchRequests() {
   });
 }
 
-// Fallback card appender if offline
+// Fallback card appender if offline or unconfigured
 function addLocalTrackerCard(reqId, type, locationOrFacility, status, details) {
   const trackerList = document.getElementById('tracker-list');
   if (!trackerList) return;
@@ -135,11 +148,11 @@ function addLocalTrackerCard(reqId, type, locationOrFacility, status, details) {
   trackerList.prepend(newCard);
 }
 
-// 4. Supabase Sign Up Authentication
+// 5. Supabase Sign Up Authentication
 async function handleSignUp(event) {
   event.preventDefault();
   if (!supabase) {
-    alert('Supabase is not initialized.');
+    alert('Please configure your Supabase URL and Anon Key in script.js first.');
     return;
   }
 
@@ -162,11 +175,11 @@ async function handleSignUp(event) {
   }, 4000);
 }
 
-// 5. Supabase Log In Authentication
+// 6. Supabase Log In Authentication
 async function handleLogin(event) {
   event.preventDefault();
   if (!supabase) {
-    alert('Supabase is not initialized.');
+    alert('Please configure your Supabase URL and Anon Key in script.js first.');
     return;
   }
 
@@ -189,18 +202,23 @@ async function handleLogin(event) {
   }, 3000);
 }
 
-// 6. Supabase Log Out
+// 7. Supabase Log Out
 async function handleLogout() {
   if (!supabase) return;
   await supabase.auth.signOut();
   checkUserSession();
 }
 
-// 7. Check Active Session UI Toggle
+// 8. Check Active Session UI Toggle
 async function checkUserSession() {
   if (!supabase) return;
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (error) {
+    console.error('Session error:', error);
+    return;
+  }
+
   const formsContainer = document.getElementById('auth-forms-container');
   const userProfile = document.getElementById('user-profile');
   const emailDisplay = document.getElementById('user-email-display');
