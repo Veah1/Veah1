@@ -1,11 +1,17 @@
-// Initialize Supabase Client
-const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Initialize Supabase Client (Replace with your actual Supabase URL and Anon Key)
+const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
+const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
-// Fetch existing requests on page load
-window.addEventListener('DOMContentLoaded', fetchRequests);
+// Fetch existing requests on page load if database is connected
+window.addEventListener('DOMContentLoaded', () => {
+  if (supabase) {
+    fetchRequests();
+    checkUserSession();
+  }
+});
 
+// 1. Tab Switching Function (Fixes "switchTab is not defined")
 function switchTab(tabId, btnId) {
   document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -13,30 +19,196 @@ function switchTab(tabId, btnId) {
     btn.setAttribute('aria-selected', 'false');
   });
 
-  document.getElementById(tabId).classList.add('active');
-  const activeBtn = document.getElementById(btnId);
-  activeBtn.classList.add('active');
-  activeBtn.setAttribute('aria-selected', 'true');
+  const selectedTab = document.getElementById(tabId);
+  const selectedBtn = document.getElementById(btnId);
+
+  if (selectedTab) selectedTab.classList.add('active');
+  if (selectedBtn) {
+    selectedBtn.classList.add('active');
+    selectedBtn.setAttribute('aria-selected', 'true');
+  }
 }
 
-// Handle User Sign Up
-async function handleSignUp(event) {
+// 2. Form Submission Handler (Public Outreach & Shelter Portals)
+async function handleFormSubmit(event, type, alertId) {
   event.preventDefault();
-  const email = document.getElementById('signup-email').value;
-  const password = document.getElementById('signup-password').value;
-  const role = document.getElementById('user-role').value;
-  const alertBox = document.getElementById('auth-alert');
 
-  const { data, error } = await supabase.auth.signUp({
-    email: email,
-    password: password,
-    options: {
-      data: {
-        account_type: role
+  const alertBox = document.getElementById(alertId);
+  const reqId = 'REQ-' + Math.floor(1000 + Math.random() * 9000);
+  
+  let category, details, locationOrFacility;
+  if (type === 'Public Outreach Request') {
+    locationOrFacility = document.getElementById('location').value;
+    category = document.getElementById('primary-need').value;
+    details = document.getElementById('description').value;
+  } else {
+    locationOrFacility = document.getElementById('shelter-name').value + ' (' + document.getElementById('staff-role').value + ')';
+    category = document.getElementById('request-type').value;
+    details = document.getElementById('details').value;
+  }
+
+  // If Supabase is connected, save to database
+  if (supabase) {
+    const { error } = await supabase.from('requests').insert([
+      {
+        request_id: reqId,
+        request_type: type,
+        category: category,
+        details: details,
+        location_or_facility: locationOrFacility,
+        status: 'Pending Review'
       }
+    ]);
+
+    if (error) {
+      console.error('Error inserting data:', error);
+      alert('There was an error submitting your request. Please try again.');
+      return;
     }
-  });
+    fetchRequests();
+  } else {
+    // Fallback local update if Supabase isn't configured yet
+    addLocalTrackerCard(reqId, type, locationOrFacility, 'Pending Review', details);
+  }
+
+  if (alertBox) alertBox.style.display = 'block';
+  event.target.reset();
+
+  setTimeout(() => {
+    if (alertBox) alertBox.style.display = 'none';
+  }, 4000);
+}
+
+// 3. Fetch Requests from Supabase
+async function fetchRequests() {
+  if (!supabase) return;
+
+  const { data, error } = await supabase
+    .from('requests')
+    .select('*')
+    .order('created_at', { ascending: false });
 
   if (error) {
-    alertBox.style.display = 'block';
-    alertBox.style.backgroundColor =
+    console.error('Error fetching requests:', error);
+    return;
+  }
+
+  const trackerList = document.getElementById('tracker-list');
+  if (!trackerList) return;
+  
+  trackerList.innerHTML = '';
+
+  data.forEach(req => {
+    let badgeClass = 'badge-pending';
+    if (req.status === 'In Progress') badgeClass = 'badge-in-progress';
+    if (req.status === 'Completed') badgeClass = 'badge-completed';
+
+    const newCard = document.createElement('div');
+    newCard.className = 'status-card';
+    newCard.innerHTML = `
+      <div class="status-header">
+        <span class="status-id">${req.request_id}</span>
+        <span class="badge ${badgeClass}">${req.status}</span>
+      </div>
+      <strong class="card-title">${req.request_type} (${req.category})</strong>
+      <p class="card-sub">Location/Facility: ${req.location_or_facility}</p>
+      <p class="card-meta"><em>Details: ${req.details}</em></p>
+    `;
+    trackerList.appendChild(newCard);
+  });
+}
+
+// Fallback local card appender if offline/testing
+function addLocalTrackerCard(reqId, type, locationOrFacility, status, details) {
+  const trackerList = document.getElementById('tracker-list');
+  if (!trackerList) return;
+
+  const newCard = document.createElement('div');
+  newCard.className = 'status-card';
+  newCard.innerHTML = `
+    <div class="status-header">
+      <span class="status-id">${reqId}</span>
+      <span class="badge badge-pending">${status}</span>
+    </div>
+    <strong class="card-title">${type}</strong>
+    <p class="card-sub">Location/Facility: ${locationOrFacility}</p>
+    <p class="card-meta"><em>Details: ${details}</em></p>
+  `;
+  trackerList.prepend(newCard);
+}
+
+// 4. Supabase Sign Up Authentication
+async function handleSignUp(event) {
+  event.preventDefault();
+  if (!supabase) {
+    alert('Supabase is not initialized.');
+    return;
+  }
+
+  const email = document.getElementById('signup-email').value;
+  const password = document.getElementById('signup-password').value;
+  const alertBox = document.getElementById('signup-alert');
+
+  const { data, error } = await supabase.auth.signUp({ email, password });
+
+  if (error) {
+    alert('Sign up error: ' + error.message);
+    return;
+  }
+
+  if (alertBox) alertBox.style.display = 'block';
+  event.target.reset();
+}
+
+// 5. Supabase Log In Authentication
+async function handleLogin(event) {
+  event.preventDefault();
+  if (!supabase) {
+    alert('Supabase is not initialized.');
+    return;
+  }
+
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  const alertBox = document.getElementById('login-alert');
+
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    alert('Log in error: ' + error.message);
+    return;
+  }
+
+  if (alertBox) alertBox.style.display = 'block';
+  checkUserSession();
+
+  setTimeout(() => {
+    if (alertBox) alertBox.style.display = 'none';
+  }, 3000);
+}
+
+// 6. Supabase Log Out
+async function handleLogout() {
+  if (!supabase) return;
+  await supabase.auth.signOut();
+  checkUserSession();
+}
+
+// 7. Check Active Session UI Toggle
+async function checkUserSession() {
+  if (!supabase) return;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  const formsContainer = document.getElementById('auth-forms-container');
+  const userProfile = document.getElementById('user-profile');
+  const emailDisplay = document.getElementById('user-email-display');
+
+  if (session) {
+    if (formsContainer) formsContainer.style.display = 'none';
+    if (userProfile) userProfile.style.display = 'block';
+    if (emailDisplay) emailDisplay.textContent = session.user.email;
+  } else {
+    if (formsContainer) formsContainer.style.display = 'block';
+    if (userProfile) userProfile.style.display = 'none';
+  }
+}
