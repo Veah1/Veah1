@@ -1,6 +1,9 @@
+const SUPABASE_URL = 'YOUR_MAIN_SUPABASE_URL_HERE';
+const SUPABASE_ANON_KEY = 'YOUR_MAIN_SUPABASE_ANON_KEY_HERE';
+
 let dbClient = null;
 
-if (window.supabase && SUPABASE_URL && SUPABASE_URL !== 'YOUR_SUPABASE_URL_HERE') {
+if (window.supabase && SUPABASE_URL && SUPABASE_URL !== 'YOUR_MAIN_SUPABASE_URL_HERE') {
   try {
     dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   } catch (err) {
