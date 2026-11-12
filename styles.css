@@ -26,7 +26,6 @@ body {
   padding-bottom: 2rem;
 }
 
-/* Accessibility Focus Styling */
 a:focus, button:focus, input:focus, select:focus, textarea:focus {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
@@ -69,6 +68,7 @@ nav {
   font-weight: 600;
   border-radius: 6px;
   cursor: pointer;
+  text-decoration: none;
   transition: background-color 0.2s, border-color 0.2s;
 }
 
@@ -88,16 +88,11 @@ main {
 }
 
 .tab-content {
-  display: none;
   background: var(--card-bg);
   padding: 1.5rem;
   border-radius: 8px;
   border: 1px solid var(--border);
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-.tab-content.active {
-  display: block;
 }
 
 h2 {
@@ -126,6 +121,7 @@ label {
 
 input[type="text"],
 input[type="email"],
+input[type="password"],
 select,
 textarea {
   width: 100%;
