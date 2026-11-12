@@ -3,7 +3,6 @@ const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y ';
 
 let supabase = null;
 
-// Only initialize if window.supabase exists and user replaced the placeholder keys
 if (window.supabase && SUPABASE_URL && SUPABASE_URL !== 'YOUR_SUPABASE_URL_HERE') {
   try {
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -12,7 +11,6 @@ if (window.supabase && SUPABASE_URL && SUPABASE_URL !== 'YOUR_SUPABASE_URL_HERE'
   }
 }
 
-// Run initial checks when page loads
 window.addEventListener('DOMContentLoaded', () => {
   if (supabase) {
     fetchRequests();
@@ -22,7 +20,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 2. Tab Switching Function
 function switchTab(tabId, btnId) {
   document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -40,7 +37,6 @@ function switchTab(tabId, btnId) {
   }
 }
 
-// 3. Form Submission Handler (Public Outreach & Shelter Portals)
 async function handleFormSubmit(event, type, alertId) {
   event.preventDefault();
 
@@ -77,7 +73,6 @@ async function handleFormSubmit(event, type, alertId) {
     }
     fetchRequests();
   } else {
-    // Fallback local UI update if Supabase isn't hooked up yet
     addLocalTrackerCard(reqId, type, locationOrFacility, 'Pending Review', details);
   }
 
@@ -89,7 +84,6 @@ async function handleFormSubmit(event, type, alertId) {
   }, 4000);
 }
 
-// 4. Fetch Requests from Supabase
 async function fetchRequests() {
   if (!supabase) return;
 
@@ -128,7 +122,6 @@ async function fetchRequests() {
   });
 }
 
-// Fallback card appender if offline or unconfigured
 function addLocalTrackerCard(reqId, type, locationOrFacility, status, details) {
   const trackerList = document.getElementById('tracker-list');
   if (!trackerList) return;
@@ -147,7 +140,6 @@ function addLocalTrackerCard(reqId, type, locationOrFacility, status, details) {
   trackerList.prepend(newCard);
 }
 
-// 5. Supabase Sign Up Authentication
 async function handleSignUp(event) {
   event.preventDefault();
   if (!supabase) {
@@ -174,7 +166,6 @@ async function handleSignUp(event) {
   }, 4000);
 }
 
-// 6. Supabase Log In Authentication
 async function handleLogin(event) {
   event.preventDefault();
   if (!supabase) {
@@ -201,14 +192,12 @@ async function handleLogin(event) {
   }, 3000);
 }
 
-// 7. Supabase Log Out
 async function handleLogout() {
   if (!supabase) return;
   await supabase.auth.signOut();
   checkUserSession();
 }
 
-// 8. Check Active Session UI Toggle
 async function checkUserSession() {
   if (!supabase) return;
 
