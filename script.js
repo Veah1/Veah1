@@ -1,43 +1,26 @@
-const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co ';
+// Replace with your actual Supabase URL and Anon Key when ready
+const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y';
 
-let supabase = null;
+let dbClient = null;
 
 if (window.supabase && SUPABASE_URL && SUPABASE_URL !== 'YOUR_SUPABASE_URL_HERE') {
   try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   } catch (err) {
     console.warn('Supabase initialization error:', err);
   }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  if (supabase) {
+  if (dbClient) {
     fetchRequests();
     checkUserSession();
-  } else {
-    console.log('Running in local demo mode.');
   }
 });
 
-function switchTab(tabId, btnId) {
-  document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.classList.remove('active');
-    btn.setAttribute('aria-selected', 'false');
-  });
-
-  const selectedTab = document.getElementById(tabId);
-  const selectedBtn = document.getElementById(btnId);
-
-  if (selectedTab) selectedTab.classList.add('active');
-  if (selectedBtn) {
-    selectedBtn.classList.add('active');
-    selectedBtn.setAttribute('aria-selected', 'true');
-  }
-}
-
-async function handleFormSubmit(event, type, alertId) {
+// Form Submission Handler
+window.handleFormSubmit = async function(event, type, alertId) {
   event.preventDefault();
 
   const alertBox = document.getElementById(alertId);
@@ -54,8 +37,8 @@ async function handleFormSubmit(event, type, alertId) {
     details = document.getElementById('details').value;
   }
 
-  if (supabase) {
-    const { error } = await supabase.from('requests').insert([
+  if (dbClient) {
+    const { error } = await dbClient.from('requests').insert([
       {
         request_id: reqId,
         request_type: type,
@@ -70,9 +53,6 @@ async function handleFormSubmit(event, type, alertId) {
       alert('Error saving to Supabase: ' + error.message);
       return;
     }
-    fetchRequests();
-  } else {
-    addLocalTrackerCard(reqId, type, locationOrFacility, 'Pending Review', details);
   }
 
   if (alertBox) alertBox.style.display = 'block';
@@ -81,12 +61,13 @@ async function handleFormSubmit(event, type, alertId) {
   setTimeout(() => {
     if (alertBox) alertBox.style.display = 'none';
   }, 4000);
-}
+};
 
+// Fetch Requests for Status Tracker
 async function fetchRequests() {
-  if (!supabase) return;
+  if (!dbClient) return;
 
-  const { data, error } = await supabase
+  const { data, error } = await dbClient
     .from('requests')
     .select('*')
     .order('created_at', { ascending: false });
@@ -118,27 +99,10 @@ async function fetchRequests() {
   });
 }
 
-function addLocalTrackerCard(reqId, type, locationOrFacility, status, details) {
-  const trackerList = document.getElementById('tracker-list');
-  if (!trackerList) return;
-
-  const newCard = document.createElement('div');
-  newCard.className = 'status-card';
-  newCard.innerHTML = `
-    <div class="status-header">
-      <span class="status-id">${reqId}</span>
-      <span class="badge badge-pending">${status}</span>
-    </div>
-    <strong class="card-title">${type}</strong>
-    <p class="card-sub">Location/Facility: ${locationOrFacility}</p>
-    <p class="card-meta"><em>Details: ${details}</em></p>
-  `;
-  trackerList.prepend(newCard);
-}
-
-async function handleSignUp(event) {
+// Authentication Handlers
+window.handleSignUp = async function(event) {
   event.preventDefault();
-  if (!supabase) {
+  if (!dbClient) {
     alert('Supabase is not configured.');
     return;
   }
@@ -147,7 +111,7 @@ async function handleSignUp(event) {
   const password = document.getElementById('signup-password').value;
   const alertBox = document.getElementById('signup-alert');
 
-  const { error } = await supabase.auth.signUp({ email, password });
+  const { error } = await dbClient.auth.signUp({ email, password });
   if (error) {
     alert('Sign up error: ' + error.message);
     return;
@@ -155,11 +119,11 @@ async function handleSignUp(event) {
 
   if (alertBox) alertBox.style.display = 'block';
   event.target.reset();
-}
+};
 
-async function handleLogin(event) {
+window.handleLogin = async function(event) {
   event.preventDefault();
-  if (!supabase) {
+  if (!dbClient) {
     alert('Supabase is not configured.');
     return;
   }
@@ -168,7 +132,7 @@ async function handleLogin(event) {
   const password = document.getElementById('login-password').value;
   const alertBox = document.getElementById('login-alert');
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await dbClient.auth.signInWithPassword({ email, password });
   if (error) {
     alert('Log in error: ' + error.message);
     return;
@@ -176,18 +140,18 @@ async function handleLogin(event) {
 
   if (alertBox) alertBox.style.display = 'block';
   checkUserSession();
-}
+};
 
-async function handleLogout() {
-  if (!supabase) return;
-  await supabase.auth.signOut();
+window.handleLogout = async function() {
+  if (!dbClient) return;
+  await dbClient.auth.signOut();
   checkUserSession();
-}
+};
 
 async function checkUserSession() {
-  if (!supabase) return;
+  if (!dbClient) return;
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await dbClient.auth.getSession();
   const formsContainer = document.getElementById('auth-forms-container');
   const userProfile = document.getElementById('user-profile');
   const emailDisplay = document.getElementById('user-email-display');
