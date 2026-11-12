@@ -1,5 +1,5 @@
-const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co'; // Replace with your actual project URL
-const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y '; // Replace with your actual anon key
+const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co'; 
+const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y '; 
 
 let supabase = null;
 
