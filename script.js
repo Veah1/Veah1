@@ -1,4 +1,3 @@
-const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co'; 
 const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y '; 
 
 let supabase = null;
