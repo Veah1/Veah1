@@ -1,5 +1,5 @@
 const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y';
+const SUPABASE_ANON_KEY = 'YOUR_ACTUAL_ANON_KEY_HERE'; // Replace with your real Supabase anon key
 
 let dbClient = null;
 
@@ -18,6 +18,31 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// Tab Switching Logic (Fixes the switchTab is not defined error)
+window.switchTab = function(targetTabId, targetBtnId) {
+  // Hide all sections
+  document.querySelectorAll('.tab-content').forEach(section => {
+    section.classList.remove('active');
+  });
+
+  // Remove active class from all nav buttons
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.remove('active');
+    btn.setAttribute('aria-selected', 'false');
+  });
+
+  // Show target section & activate button
+  const targetSection = document.getElementById(targetTabId);
+  const targetBtn = document.getElementById(targetBtnId);
+
+  if (targetSection) targetSection.classList.add('active');
+  if (targetBtn) {
+    targetBtn.classList.add('active');
+    targetBtn.setAttribute('aria-selected', 'true');
+  }
+};
+
+// Form Submission Handler
 window.handleFormSubmit = async function(event, type, alertId) {
   event.preventDefault();
 
