@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In / Sign Up - Shelter Network</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Community & Shelter Support Network</h1>
+    <p>Staff and Administrator Portal</p>
+  </header>
+
+  <nav aria-label="Portal Navigation">
+    <a href="index.html" class="nav-btn">Outreach Form</a>
+    <a href="shelter.html" class="nav-btn">Shelter Staff Portal</a>
+    <a href="tracker.html" class="nav-btn">Status Tracker</a>
+    <a href="auth.html" class="nav-btn active">Log In / Sign Up</a>
+  </nav>
+
+  <main>
+    <!-- Logged In View (Hidden by default until session exists) -->
+    <section id="user-profile" class="tab-content" style="display: none;">
+      <h2>Staff Account</h2>
+      <p class="section-desc">You are currently logged in as: <strong id="user-email-display"></strong></p>
+      <button onclick="handleLogout()" class="btn-submit" style="background-color: #DC2626;">Log Out</button>
+    </section>
+
+    <!-- Auth Forms Container -->
+    <div id="auth-forms-container">
+      <!-- Login Section -->
+      <section class="tab-content" style="margin-bottom: 1.5rem;">
+        <h2>Staff Log In</h2>
+        <p class="section-desc">Sign in to access secure shelter management features.</p>
+        
+        <div id="login-alert" class="alert-success" role="alert">Logged in successfully!</div>
+
+        <form onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="login-email">Email Address *</label>
+            <input type="email" id="login-email" required placeholder="staff@shelternetwork.org">
+          </div>
+
+          <div class="form-group">
+            <label for="login-password">Password *</label>
+            <input type="password" id="login-password" required placeholder="Enter your password">
+          </div>
+
+          <button type="submit" class="btn-submit">Log In</button>
+        </form>
+      </section>
+
+      <!-- Sign Up Section -->
+      <section class="tab-content">
+        <h2>Create Staff Account</h2>
+        <p class="section-desc">Register a new account for shelter staff operations.</p>
+        
+        <div id="signup-alert" class="alert-success" role="alert">Account created successfully! You can now log in above.</div>
+
+        <form onsubmit="handleSignUp(event)">
+          <div class="form-group">
+            <label for="signup-email">Email Address *</label>
+            <input type="email" id="signup-email" required placeholder="staff@shelternetwork.org">
+          </div>
+
+          <div class="form-group">
+            <label for="signup-password">Password *</label>
+            <input type="password" id="signup-password" required placeholder="Create a secure password">
+          </div>
+
+          <button type="submit" class="btn-submit" style="background-color: var(--secondary);">Sign Up</button>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
