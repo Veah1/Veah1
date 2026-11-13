@@ -1,6 +1,5 @@
-const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y';
-
+const SUPABASE_URL = 'YOUR_MAIN_SUPABASE_URL_HERE';
+const SUPABASE_ANON_KEY = 'YOUR_MAIN_SUPABASE_ANON_KEY_HERE';
 let dbClient = null;
 
 if (window.supabase && SUPABASE_URL && SUPABASE_URL !== 'YOUR_MAIN_SUPABASE_URL_HERE') {
