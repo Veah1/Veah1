@@ -1,5 +1,5 @@
 const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_ACTUAL_ANON_KEY_HERE'; // Replace with your real Supabase anon key
+const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y'; 
 
 let dbClient = null;
 
