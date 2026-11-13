@@ -1,5 +1,5 @@
-const SUPABASE_URL = 'YOUR_MAIN_SUPABASE_URL_HERE';
-const SUPABASE_ANON_KEY = 'YOUR_MAIN_SUPABASE_ANON_KEY_HERE';
+const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y';
 
 let dbClient = null;
 
@@ -18,7 +18,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Form Submission Handler
 window.handleFormSubmit = async function(event, type, alertId) {
   event.preventDefault();
 
