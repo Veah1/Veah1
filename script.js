@@ -1,5 +1,6 @@
-const SUPABASE_URL = 'YOUR_MAIN_SUPABASE_URL_HERE';
-const SUPABASE_ANON_KEY = 'YOUR_MAIN_SUPABASE_ANON_KEY_HERE';
+const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_MAIN_SUPABASE_ANON_KEY_HERE'; // Replace with your actual anon key
+
 let dbClient = null;
 
 if (window.supabase && SUPABASE_URL && SUPABASE_URL !== 'YOUR_MAIN_SUPABASE_URL_HERE') {
@@ -9,7 +10,6 @@ if (window.supabase && SUPABASE_URL && SUPABASE_URL !== 'YOUR_MAIN_SUPABASE_URL_
     console.warn('Supabase initialization error:', err);
   }
 }
-
 window.addEventListener('DOMContentLoaded', () => {
   if (dbClient) {
     fetchRequests();
