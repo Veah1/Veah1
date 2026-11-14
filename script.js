@@ -1,3 +1,4 @@
+const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y'; 
 let dbClient = null;
 
@@ -8,6 +9,7 @@ if (window.supabase && SUPABASE_URL && SUPABASE_URL !== 'YOUR_MAIN_SUPABASE_URL_
     console.warn('Supabase initialization error:', err);
   }
 }
+
 window.addEventListener('DOMContentLoaded', () => {
   if (dbClient) {
     fetchRequests();
@@ -106,13 +108,23 @@ window.handleSignUp = async function(event) {
   const password = document.getElementById('signup-password').value;
   const alertBox = document.getElementById('signup-alert');
 
-  const { error } = await dbClient.auth.signUp({ email, password });
+  const { error } = await dbClient.auth.signUp({ 
+    email, 
+    password,
+    options: {
+      emailRedirectTo: window.location.origin
+    }
+  });
+
   if (error) {
     alert('Sign up error: ' + error.message);
     return;
   }
 
-  if (alertBox) alertBox.style.display = 'block';
+  if (alertBox) {
+    alertBox.textContent = 'Account created! Please check your email inbox to confirm your registration before logging in.';
+    alertBox.style.display = 'block';
+  }
   event.target.reset();
 };
 
