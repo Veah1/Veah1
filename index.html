@@ -9,6 +9,13 @@
 </head>
 <body>
 
+  <!-- Emergency & Quick Support Bar -->
+  <div class="emergency-bar">
+    <span>⚠️ <strong>Urgent Medical or Safety Emergency?</strong> Call <strong>911</strong>. For Crisis Support:</span>
+    <a href="tel:988" class="emergency-btn">Call 988 Crisis Line</a>
+    <a href="tel:211" class="emergency-btn">Call 211 Services</a>
+  </div>
+
   <header>
     <h1>Community & Shelter Support Network</h1>
     <p>Bridging direct community support and shelter operations</p>
@@ -18,10 +25,36 @@
     <button class="nav-btn active" role="tab" aria-selected="true" aria-controls="public-tab" id="tab-1" onclick="switchTab('public-tab', 'tab-1')">Public Outreach Form</button>
     <button class="nav-btn" role="tab" aria-selected="false" aria-controls="shelter-tab" id="tab-2" onclick="switchTab('shelter-tab', 'tab-2')">Shelter Staff Portal</button>
     <button class="nav-btn" role="tab" aria-selected="false" aria-controls="tracker-tab" id="tab-3" onclick="switchTab('tracker-tab', 'tab-3')">Status Tracker</button>
+    <button class="nav-btn" role="tab" aria-selected="false" aria-controls="wishlist-tab" id="tab-5" onclick="switchTab('wishlist-tab', 'tab-5')">Supply Wishlist</button>
     <button class="nav-btn" role="tab" aria-selected="false" aria-controls="auth-tab" id="tab-4" onclick="switchTab('auth-tab', 'tab-4')">Log In / Sign Up</button>
   </nav>
 
   <main>
+    <!-- Live Shelter Capacity Widget -->
+    <section class="capacity-widget">
+      <div class="capacity-header">
+        <h2>Live Regional Shelter Capacity</h2>
+        <span class="card-meta">Updated real-time</span>
+      </div>
+      <div class="capacity-grid">
+        <div class="capacity-card">
+          <h4>Downtown Hope Center</h4>
+          <p class="bed-count bed-available">8 Beds Open</p>
+          <span class="card-meta">Men & Women | Intake till 9 PM</span>
+        </div>
+        <div class="capacity-card">
+          <h4>Eastside Haven Shelter</h4>
+          <p class="bed-count bed-limited">2 Beds Open</p>
+          <span class="card-meta">Family Beds | High Demand</span>
+        </div>
+        <div class="capacity-card">
+          <h4>St. Jude Youth Sanctuary</h4>
+          <p class="bed-count bed-full">At Capacity</p>
+          <span class="card-meta">Waitlist Active</span>
+        </div>
+      </div>
+    </section>
+
     <!-- TAB 1: Public Outreach Form -->
     <section id="public-tab" class="tab-content active" role="tabpanel" aria-labelledby="tab-1">
       <h2>Report an Individual Needing Outreach Assistance</h2>
@@ -43,6 +76,15 @@
             <option value="Medical / Health Care">Medical / Health Care</option>
             <option value="Emergency Shelter Intake">Emergency Shelter Intake</option>
             <option value="Employment Pathways / Training">Employment Pathways / Training</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="urgency-level">Urgency Level *</label>
+          <select id="urgency-level" required>
+            <option value="Standard">Standard (Response within 24 hours)</option>
+            <option value="Moderate">Moderate (Cold/Hot weather exposure concern)</option>
+            <option value="High (Immediate Outreach)">High (Critical non-emergency care needed)</option>
           </select>
         </div>
 
@@ -85,6 +127,15 @@
         </div>
 
         <div class="form-group">
+          <label for="shelter-urgency">Resource Priority *</label>
+          <select id="shelter-urgency" required>
+            <option value="Standard">Standard Request</option>
+            <option value="Moderate">Urgent Capacity Needs</option>
+            <option value="High (Immediate Outreach)">Critical Operation Disruption</option>
+          </select>
+        </div>
+
+        <div class="form-group">
           <label for="details">Operational Concerns / Request Details *</label>
           <textarea id="details" required placeholder="Describe specific resource gaps, number of residents affected, or operational needs..."></textarea>
         </div>
@@ -98,8 +149,17 @@
       <h2>Live Request Status Tracker</h2>
       <p class="section-desc">Real-time tracking for active public outreach requests and shelter resource requests.</p>
 
+      <div class="filter-bar">
+        <input type="text" id="tracker-search" placeholder="Search by Location, Need, or ID..." oninput="filterTracker()">
+        <div class="filter-btn-group">
+          <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+          <button class="filter-btn" onclick="setFilter('badge-pending', this)">Pending</button>
+          <button class="filter-btn" onclick="setFilter('badge-in-progress', this)">In Progress</button>
+        </div>
+      </div>
+
       <div id="tracker-list">
-        <div class="status-card">
+        <div class="status-card" data-status="badge-in-progress">
           <div class="status-header">
             <span class="status-id">REQ-1042</span>
             <span class="badge badge-in-progress">In Progress</span>
@@ -109,7 +169,7 @@
           <p class="card-meta"><em>Status Update: Mobile team scheduled for direct check-in today.</em></p>
         </div>
 
-        <div class="status-card">
+        <div class="status-card" data-status="badge-pending">
           <div class="status-header">
             <span class="status-id">REQ-1041</span>
             <span class="badge badge-pending">Pending Review</span>
@@ -121,13 +181,36 @@
       </div>
     </section>
 
+    <!-- TAB 5: Supply Wishlist Section -->
+    <section id="wishlist-tab" class="tab-content" role="tabpanel" aria-labelledby="tab-5">
+      <h2>Community & Shelter Supply Wishlist</h2>
+      <p class="section-desc">Shelters frequently need specific donations. Help meet these immediate requests.</p>
+
+      <div id="wishlist-container">
+        <div class="wishlist-item">
+          <div>
+            <strong>Heavy Winter Blankets & Jackets (50 units)</strong>
+            <p class="card-meta">Requested by: Downtown Hope Center | Urgency: High</p>
+          </div>
+          <button class="btn-secondary" onclick="alert('Thank you for offering to donate! Outreach team notified.')">Pledge Item</button>
+        </div>
+        <div class="wishlist-item">
+          <div>
+            <strong>Hygiene & Grooming Kits (100 units)</strong>
+            <p class="card-meta">Requested by: Mobile Health Unit | Urgency: Medium</p>
+          </div>
+          <button class="btn-secondary" onclick="alert('Thank you for offering to donate! Outreach team notified.')">Pledge Item</button>
+        </div>
+      </div>
+    </section>
+
     <!-- TAB 4: Log In / Sign Up Portal -->
     <section id="auth-tab" class="tab-content" role="tabpanel" aria-labelledby="tab-4">
       <div id="auth-forms-container">
         <!-- Log In Form -->
         <h2>Log In to Your Account</h2>
         <p class="section-desc">Access authorized shelter management and response features.</p>
-        
+
         <div id="login-alert" class="alert-success" role="alert">Logged in successfully!</div>
 
         <form id="login-form" onsubmit="handleLogin(event)">
@@ -149,7 +232,7 @@
         <!-- Sign Up Form -->
         <h2>Create a New Account</h2>
         <p class="section-desc">Register as a shelter staff member, case manager, or outreach partner.</p>
-        
+
         <div id="signup-alert" class="alert-success" role="alert">Account created! Check your email to confirm registration.</div>
 
         <form id="signup-form" onsubmit="handleSignUp(event)">
