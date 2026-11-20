@@ -1,202 +1,651 @@
-<!-- TAB 1: Public Outreach Form -->
-<section id="public-tab" class="tab-content active" role="tabpanel" aria-labelledby="tab-1">
-  <h2>Report an Individual Needing Outreach Assistance</h2>
-  <p class="section-desc">Submit location and basic detail so our mobile team can direct health care, hygiene, and shelter support.</p>
-  
-  <div id="public-alert" class="alert-success" role="alert">Report submitted successfully! Track progress in the Status Tracker tab.</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shelter & Outreach Coordination Network</title>
+  <style>
+    :root {
+      --primary: #1E3A8A;
+      --primary-hover: #1E40AF;
+      --secondary: #0D9488;
+      --bg-main: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --text-main: #0F172A;
+      --text-muted: #475569;
+      --border: #CBD5E1;
+      --success: #15803D;
+      --warning: #B45309;
+      --danger: #DC2626;
+      --focus-ring: #2563EB;
+    }
 
-  <form id="public-form" onsubmit="handleFormSubmit(event, 'Public Outreach Request', 'public-alert')">
-    <div class="form-group">
-      <label for="location">Location / Cross Streets *</label>
-      <input type="text" id="location" required placeholder="e.g., 5th Ave and Main St, near the park bench">
-    </div>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
-    <div class="form-group">
-      <label for="primary-need">Primary Need Identified *</label>
-      <select id="primary-need" required>
-        <option value="">Select a service category...</option>
-        <option value="Hygiene & Physical Restoration">Hygiene & Physical Restoration</option>
-        <option value="Medical / Health Care">Medical / Health Care</option>
-        <option value="Emergency Shelter Intake">Emergency Shelter Intake</option>
-        <option value="Employment Pathways / Training">Employment Pathways / Training</option>
-      </select>
-    </div>
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-bottom: 2rem;
+    }
 
-    <div class="form-group">
-      <label for="urgency-level">Urgency Level *</label>
-      <select id="urgency-level" required>
-        <option value="Standard">Standard (Response within 24 hours)</option>
-        <option value="Moderate">Moderate (Cold/Hot weather exposure concern)</option>
-        <option value="High (Immediate Outreach)">High (Critical non-emergency care needed)</option>
-      </select>
-    </div>
+    a:focus, button:focus, input:focus, select:focus, textarea:focus {
+      outline: 3px solid var(--focus-ring);
+      outline-offset: 2px;
+    }
 
-    <div class="form-group">
-      <label for="description">Physical Description & Additional Notes *</label>
-      <textarea id="description" required placeholder="Brief description (clothing, identifiable markers) and immediate observations..."></textarea>
-    </div>
+    .emergency-bar {
+      background-color: #FEF2F2;
+      border-bottom: 2px solid #FCA5A5;
+      color: #991B1B;
+      padding: 0.75rem 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
 
-    <button type="submit" class="btn-submit">Submit Outreach Request</button>
-  </form>
-</section>
+    .emergency-btn {
+      background-color: var(--danger);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: background-color 0.2s;
+    }
 
-<!-- TAB 2: Shelter Staff Portal -->
-<section id="shelter-tab" class="tab-content" role="tabpanel" aria-labelledby="tab-2">
-  <h2>Shelter Staff & Case Manager Portal</h2>
-  <p class="section-desc">Log facility updates, request partner resources, or communicate operational concerns directly.</p>
+    .emergency-btn:hover {
+      background-color: #B91C1C;
+    }
 
-  <div id="shelter-alert" class="alert-success" role="alert">Shelter report logged! Our coordination team has been notified.</div>
+    header {
+      background-color: var(--primary);
+      color: white;
+      padding: 1.25rem 1rem;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
 
-  <form id="shelter-form" onsubmit="handleFormSubmit(event, 'Shelter Resource Request', 'shelter-alert')">
-    <div class="form-group">
-      <label for="shelter-name">Facility Name *</label>
-      <input type="text" id="shelter-name" required placeholder="e.g., Downtown Hope Center">
-    </div>
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
 
-    <div class="form-group">
-      <label for="staff-role">Your Role / Title *</label>
-      <input type="text" id="staff-role" required placeholder="e.g., Lead Case Manager">
-    </div>
+    header p {
+      font-size: 0.9rem;
+      margin-top: 0.25rem;
+      color: #E2E8F0;
+    }
 
-    <div class="form-group">
-      <label for="request-type">Request / Report Category *</label>
-      <select id="request-type" required>
-        <option value="">Select category...</option>
-        <option value="On-site Grooming / Hygiene Unit">On-site Grooming / Hygiene Unit</option>
-        <option value="Job Placement / Corporate Partner Connection">Job Placement / Corporate Partner Connection</option>
-        <option value="Facility Capacity & Operational Support">Facility Capacity & Operational Support</option>
-        <option value="Health & Medical Care Referral">Health & Medical Care Referral</option>
-      </select>
-    </div>
+    nav {
+      display: flex;
+      justify-content: center;
+      background-color: #0F172A;
+      padding: 0.5rem;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
 
-    <div class="form-group">
-      <label for="shelter-urgency">Resource Priority *</label>
-      <select id="shelter-urgency" required>
-        <option value="Standard">Standard Request</option>
-        <option value="Moderate">Urgent Capacity Needs</option>
-        <option value="High (Immediate Outreach)">Critical Operation Disruption</option>
-      </select>
-    </div>
+    .nav-btn {
+      background: transparent;
+      border: 2px solid transparent;
+      color: white;
+      padding: 0.6rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
 
-    <div class="form-group">
-      <label for="details">Operational Concerns / Request Details *</label>
-      <textarea id="details" required placeholder="Describe specific resource gaps, number of residents affected, or operational needs..."></textarea>
-    </div>
+    .nav-btn:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
 
-    <button type="submit" class="btn-submit">Log Shelter Submission</button>
-  </form>
-</section>
+    .nav-btn.active {
+      background-color: var(--secondary);
+      border-color: white;
+    }
 
-<!-- TAB 3: Request Status Tracker -->
-<section id="tracker-tab" class="tab-content" role="tabpanel" aria-labelledby="tab-3">
-  <h2>Live Request Status Tracker</h2>
-  <p class="section-desc">Real-time tracking for active public outreach requests and shelter resource requests.</p>
+    main {
+      max-width: 800px;
+      margin: 1.5rem auto;
+      padding: 0 1rem;
+    }
 
-  <div class="filter-bar">
-    <input type="text" id="tracker-search" placeholder="Search by Location, Need, or ID..." oninput="filterTracker()">
-    <div class="filter-btn-group">
-      <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
-      <button class="filter-btn" onclick="setFilter('badge-pending', this)">Pending</button>
-      <button class="filter-btn" onclick="setFilter('badge-in-progress', this)">In Progress</button>
-    </div>
+    .capacity-widget {
+      background: var(--card-bg);
+      padding: 1.25rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .capacity-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .capacity-header h2 {
+      font-size: 1.1rem;
+      margin: 0;
+      border: none;
+      padding: 0;
+    }
+
+    .capacity-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .capacity-card {
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.85rem;
+    }
+
+    .capacity-card h4 {
+      font-size: 0.95rem;
+      color: var(--primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .bed-count {
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin: 0.25rem 0;
+    }
+
+    .bed-available { color: var(--success); }
+    .bed-limited { color: var(--warning); }
+    .bed-full { color: var(--danger); }
+
+    /* CRITICAL TAB HIDING/SHOWING */
+    .tab-content {
+      display: none !important;
+      background: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-top: 1rem;
+    }
+
+    .tab-content.active {
+      display: block !important;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+      border-bottom: 2px solid var(--bg-main);
+      padding-bottom: 0.5rem;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: var(--text-main);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: 1rem;
+      background-color: #FAFAFA;
+      color: var(--text-main);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .btn-submit {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.85rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.2s;
+    }
+
+    .btn-submit:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar input[type="text"] {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .filter-btn-group {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .filter-btn {
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .filter-btn.active {
+      background-color: var(--secondary);
+      color: white;
+      border-color: var(--secondary);
+    }
+
+    .status-card {
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--secondary);
+      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background-color: #FAF5FF;
+    }
+
+    .status-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .status-id {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-pending {
+      background-color: #FEF3C7;
+      color: var(--warning);
+    }
+
+    .badge-in-progress {
+      background-color: #E0F2FE;
+      color: #0369A1;
+    }
+
+    .badge-completed {
+      background-color: #DCFCE7;
+      color: var(--success);
+    }
+
+    .badge-urgent {
+      background-color: #fee2e2;
+      color: var(--danger);
+    }
+
+    .card-title {
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .card-sub {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .card-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    .wishlist-item {
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background-color: #0f766e;
+    }
+
+    .alert-success {
+      background-color: #DCFCE7;
+      color: var(--success);
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      display: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Emergency & Quick Support Bar -->
+  <div class="emergency-bar">
+    <span>⚠️ <strong>Urgent Medical or Safety Emergency?</strong> Call <strong>911</strong>. For Crisis Support:</span>
+    <a href="tel:988" class="emergency-btn">Call 988 Crisis Line</a>
+    <a href="tel:211" class="emergency-btn">Call 211 Services</a>
   </div>
 
-  <div id="tracker-list">
-    <div class="status-card" data-status="badge-in-progress">
-      <div class="status-header">
-        <span class="status-id">REQ-1042</span>
-        <span class="badge badge-in-progress">In Progress</span>
+  <header>
+    <h1>Community & Shelter Support Network</h1>
+    <p>Bridging direct community support and shelter operations</p>
+  </header>
+
+  <nav role="tablist" aria-label="Portal Navigation">
+    <button class="nav-btn active" role="tab" aria-selected="true" aria-controls="public-tab" id="tab-1" onclick="switchTab('public-tab', 'tab-1')">Public Outreach Form</button>
+    <button class="nav-btn" role="tab" aria-selected="false" aria-controls="shelter-tab" id="tab-2" onclick="switchTab('shelter-tab', 'tab-2')">Shelter Staff Portal</button>
+    <button class="nav-btn" role="tab" aria-selected="false" aria-controls="tracker-tab" id="tab-3" onclick="switchTab('tracker-tab', 'tab-3')">Status Tracker</button>
+    <button class="nav-btn" role="tab" aria-selected="false" aria-controls="wishlist-tab" id="tab-5" onclick="switchTab('wishlist-tab', 'tab-5')">Supply Wishlist</button>
+    <button class="nav-btn" role="tab" aria-selected="false" aria-controls="auth-tab" id="tab-4" onclick="switchTab('auth-tab', 'tab-4')">Log In / Sign Up</button>
+  </nav>
+
+  <main>
+    <!-- Live Shelter Capacity Widget -->
+    <section class="capacity-widget">
+      <div class="capacity-header">
+        <h2>Live Regional Shelter Capacity</h2>
+        <span class="card-meta">Updated real-time</span>
       </div>
-      <strong class="card-title">Public Outreach Request</strong>
-      <p class="card-sub">Location: 4th St & Broadway | Need: Hygiene & Mobile Care</p>
-      <p class="card-meta"><em>Status Update: Mobile team scheduled for direct check-in today.</em></p>
-    </div>
-
-    <div class="status-card" data-status="badge-pending">
-      <div class="status-header">
-        <span class="status-id">REQ-1041</span>
-        <span class="badge badge-pending">Pending Review</span>
+      <div class="capacity-grid">
+        <div class="capacity-card">
+          <h4>Downtown Hope Center</h4>
+          <p class="bed-count bed-available">8 Beds Open</p>
+          <span class="card-meta">Men & Women | Intake till 9 PM</span>
+        </div>
+        <div class="capacity-card">
+          <h4>Eastside Haven Shelter</h4>
+          <p class="bed-count bed-limited">2 Beds Open</p>
+          <span class="card-meta">Family Beds | High Demand</span>
+        </div>
+        <div class="capacity-card">
+          <h4>St. Jude Youth Sanctuary</h4>
+          <p class="bed-count bed-full">At Capacity</p>
+          <span class="card-meta">Waitlist Active</span>
+        </div>
       </div>
-      <strong class="card-title">Shelter Resource Request</strong>
-      <p class="card-sub">Facility: Eastside Haven Shelter | Need: Job Placement Partner Pipeline</p>
-      <p class="card-meta"><em>Status Update: Received. Account manager assigned to contact shelter lead.</em></p>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- TAB 5: Supply Wishlist Section -->
-<section id="wishlist-tab" class="tab-content" role="tabpanel" aria-labelledby="tab-5">
-  <h2>Community & Shelter Supply Wishlist</h2>
-  <p class="section-desc">Shelters frequently need specific donations. Help meet these immediate requests.</p>
+    <!-- TAB 1: Public Outreach Form -->
+    <section id="public-tab" class="tab-content active" role="tabpanel" aria-labelledby="tab-1">
+      <h2>Report an Individual Needing Outreach Assistance</h2>
+      <p class="section-desc">Submit location and basic detail so our mobile team can direct health care, hygiene, and shelter support.</p>
+      
+      <div id="public-alert" class="alert-success" role="alert">Report submitted successfully! Track progress in the Status Tracker tab.</div>
 
-  <div id="wishlist-container">
-    <div class="wishlist-item">
-      <div>
-        <strong>Heavy Winter Blankets & Jackets (50 units)</strong>
-        <p class="card-meta">Requested by: Downtown Hope Center | Urgency: High</p>
+      <form id="public-form" onsubmit="handleFormSubmit(event, 'Public Outreach Request', 'public-alert')">
+        <div class="form-group">
+          <label for="location">Location / Cross Streets *</label>
+          <input type="text" id="location" required placeholder="e.g., 5th Ave and Main St, near the park bench">
+        </div>
+
+        <div class="form-group">
+          <label for="primary-need">Primary Need Identified *</label>
+          <select id="primary-need" required>
+            <option value="">Select a service category...</option>
+            <option value="Hygiene & Physical Restoration">Hygiene & Physical Restoration</option>
+            <option value="Medical / Health Care">Medical / Health Care</option>
+            <option value="Emergency Shelter Intake">Emergency Shelter Intake</option>
+            <option value="Employment Pathways / Training">Employment Pathways / Training</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="urgency-level">Urgency Level *</label>
+          <select id="urgency-level" required>
+            <option value="Standard">Standard (Response within 24 hours)</option>
+            <option value="Moderate">Moderate (Cold/Hot weather exposure concern)</option>
+            <option value="High (Immediate Outreach)">High (Critical non-emergency care needed)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Physical Description & Additional Notes *</label>
+          <textarea id="description" required placeholder="Brief description (clothing, identifiable markers) and immediate observations..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">Submit Outreach Request</button>
+      </form>
+    </section>
+
+    <!-- TAB 2: Shelter Staff Portal -->
+    <section id="shelter-tab" class="tab-content" role="tabpanel" aria-labelledby="tab-2">
+      <h2>Shelter Staff & Case Manager Portal</h2>
+      <p class="section-desc">Log facility updates, request partner resources, or communicate operational concerns directly.</p>
+
+      <div id="shelter-alert" class="alert-success" role="alert">Shelter report logged! Our coordination team has been notified.</div>
+
+      <form id="shelter-form" onsubmit="handleFormSubmit(event, 'Shelter Resource Request', 'shelter-alert')">
+        <div class="form-group">
+          <label for="shelter-name">Facility Name *</label>
+          <input type="text" id="shelter-name" required placeholder="e.g., Downtown Hope Center">
+        </div>
+
+        <div class="form-group">
+          <label for="staff-role">Your Role / Title *</label>
+          <input type="text" id="staff-role" required placeholder="e.g., Lead Case Manager">
+        </div>
+
+        <div class="form-group">
+          <label for="request-type">Request / Report Category *</label>
+          <select id="request-type" required>
+            <option value="">Select category...</option>
+            <option value="On-site Grooming / Hygiene Unit">On-site Grooming / Hygiene Unit</option>
+            <option value="Job Placement / Corporate Partner Connection">Job Placement / Corporate Partner Connection</option>
+            <option value="Facility Capacity & Operational Support">Facility Capacity & Operational Support</option>
+            <option value="Health & Medical Care Referral">Health & Medical Care Referral</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="shelter-urgency">Resource Priority *</label>
+          <select id="shelter-urgency" required>
+            <option value="Standard">Standard Request</option>
+            <option value="Moderate">Urgent Capacity Needs</option>
+            <option value="High (Immediate Outreach)">Critical Operation Disruption</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="details">Operational Concerns / Request Details *</label>
+          <textarea id="details" required placeholder="Describe specific resource gaps, number of residents affected, or operational needs..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">Log Shelter Submission</button>
+      </form>
+    </section>
+
+    <!-- TAB 3: Request Status Tracker -->
+    <section id="tracker-tab" class="tab-content" role="tabpanel" aria-labelledby="tab-3">
+      <h2>Live Request Status Tracker</h2>
+      <p class="section-desc">Real-time tracking for active public outreach requests and shelter resource requests.</p>
+
+      <div class="filter-bar">
+        <input type="text" id="tracker-search" placeholder="Search by Location, Need, or ID..." oninput="filterTracker()">
+        <div class="filter-btn-group">
+          <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+          <button class="filter-btn" onclick="setFilter('badge-pending', this)">Pending</button>
+          <button class="filter-btn" onclick="setFilter('badge-in-progress', this)">In Progress</button>
+        </div>
       </div>
-      <button class="btn-secondary" onclick="alert('Thank you for offering to donate! Outreach team notified.')">Pledge Item</button>
-    </div>
-    <div class="wishlist-item">
-      <div>
-        <strong>Hygiene & Grooming Kits (100 units)</strong>
-        <p class="card-meta">Requested by: Mobile Health Unit | Urgency: Medium</p>
+
+      <div id="tracker-list">
+        <div class="status-card" data-status="badge-in-progress">
+          <div class="status-header">
+            <span class="status-id">REQ-1042</span>
+            <span class="badge badge-in-progress">In Progress</span>
+          </div>
+          <strong class="card-title">Public Outreach Request</strong>
+          <p class="card-sub">Location: 4th St & Broadway | Need: Hygiene & Mobile Care</p>
+          <p class="card-meta"><em>Status Update: Mobile team scheduled for direct check-in today.</em></p>
+        </div>
+
+        <div class="status-card" data-status="badge-pending">
+          <div class="status-header">
+            <span class="status-id">REQ-1041</span>
+            <span class="badge badge-pending">Pending Review</span>
+          </div>
+          <strong class="card-title">Shelter Resource Request</strong>
+          <p class="card-sub">Facility: Eastside Haven Shelter | Need: Job Placement Partner Pipeline</p>
+          <p class="card-meta"><em>Status Update: Received. Account manager assigned to contact shelter lead.</em></p>
+        </div>
       </div>
-      <button class="btn-secondary" onclick="alert('Thank you for offering to donate! Outreach team notified.')">Pledge Item</button>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- TAB 4: Log In / Sign Up Portal -->
-<section id="auth-tab" class="tab-content" role="tabpanel" aria-labelledby="tab-4">
-  <div id="auth-forms-container">
-    <!-- Log In Form -->
-    <h2>Log In to Your Account</h2>
-    <p class="section-desc">Access authorized shelter management and response features.</p>
+    <!-- TAB 5: Supply Wishlist Section -->
+    <section id="wishlist-tab" class="tab-content" role="tabpanel" aria-labelledby="tab-5">
+      <h2>Community & Shelter Supply Wishlist</h2>
+      <p class="section-desc">Shelters frequently need specific donations. Help meet these immediate requests.</p>
 
-    <div id="login-alert" class="alert-success" role="alert">Logged in successfully!</div>
+      <div id="wishlist-container">
+        <div class="wishlist-item">
+          <div>
+            <strong>Heavy Winter Blankets & Jackets (50 units)</strong>
+            <p class="card-meta">Requested by: Downtown Hope Center | Urgency: High</p>
+          </div>
+          <button class="btn-secondary" onclick="alert('Thank you for offering to donate! Outreach team notified.')">Pledge Item</button>
+        </div>
+        <div class="wishlist-item">
+          <div>
+            <strong>Hygiene & Grooming Kits (100 units)</strong>
+            <p class="card-meta">Requested by: Mobile Health Unit | Urgency: Medium</p>
+          </div>
+          <button class="btn-secondary" onclick="alert('Thank you for offering to donate! Outreach team notified.')">Pledge Item</button>
+        </div>
+      </div>
+    </section>
 
-    <form id="login-form" onsubmit="handleLogin(event)">
-      <div class="form-group">
-        <label for="login-email">Email Address *</label>
-        <input type="email" id="login-email" required placeholder="name@organization.org">
+    <!-- TAB 4: Log In / Sign Up Portal -->
+    <section id="auth-tab" class="tab-content" role="tabpanel" aria-labelledby="tab-4">
+      <div id="auth-forms-container">
+        <!-- Log In Form -->
+        <h2>Log In to Your Account</h2>
+        <p class="section-desc">Access authorized shelter management and response features.</p>
+
+        <div id="login-alert" class="alert-success" role="alert">Logged in successfully!</div>
+
+        <form id="login-form" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="login-email">Email Address *</label>
+            <input type="email" id="login-email" required placeholder="name@organization.org">
+          </div>
+
+          <div class="form-group">
+            <label for="login-password">Password *</label>
+            <input type="password" id="login-password" required placeholder="••••••••">
+          </div>
+
+          <button type="submit" class="btn-submit">Log In</button>
+        </form>
+
+        <hr style="margin: 2rem 0; border: 0; border-top: 1px solid var(--border);">
+
+        <!-- Sign Up Form -->
+        <h2>Create a New Account</h2>
+        <p class="section-desc">Register as a shelter staff member, case manager, or outreach partner.</p>
+
+        <div id="signup-alert" class="alert-success" role="alert">Account created! Check your email to confirm registration.</div>
+
+        <form id="signup-form" onsubmit="handleSignUp(event)">
+          <div class="form-group">
+            <label for="signup-email">Email Address *</label>
+            <input type="email" id="signup-email" required placeholder="name@organization.org">
+          </div>
+
+          <div class="form-group">
+            <label for="signup-password">Password *</label>
+            <input type="password" id="signup-password" required placeholder="At least 6 characters">
+          </div>
+
+          <button type="submit" class="btn-submit" style="background-color: var(--secondary);">Sign Up</button>
+        </form>
       </div>
 
-      <div class="form-group">
-        <label for="login-password">Password *</label>
-        <input type="password" id="login-password" required placeholder="••••••••">
+      <!-- Account Details (Hidden until logged in) -->
+      <div id="user-profile" style="display: none;">
+        <h2>Welcome, <span id="user-email-display"></span></h2>
+        <p class="section-desc">You are currently logged in.</p>
+        <button type="button" class="btn-submit" onclick="handleLogout()" style="background-color: #DC2626;">Log Out</button>
       </div>
+    </section>
+  </main>
 
-      <button type="submit" class="btn-submit">Log In</button>
-    </form>
-
-    <hr style="margin: 2rem 0; border: 0; border-top: 1px solid var(--border);">
-
-    <!-- Sign Up Form -->
-    <h2>Create a New Account</h2>
-    <p class="section-desc">Register as a shelter staff member, case manager, or outreach partner.</p>
-
-    <div id="signup-alert" class="alert-success" role="alert">Account created! Check your email to confirm registration.</div>
-
-    <form id="signup-form" onsubmit="handleSignUp(event)">
-      <div class="form-group">
-        <label for="signup-email">Email Address *</label>
-        <input type="email" id="signup-email" required placeholder="name@organization.org">
-      </div>
-
-      <div class="form-group">
-        <label for="signup-password">Password *</label>
-        <input type="password" id="signup-password" required placeholder="At least 6 characters">
-      </div>
-
-      <button type="submit" class="btn-submit" style="background-color: var(--secondary);">Sign Up</button>
-    </form>
-  </div>
-
-  <!-- Account Details (Hidden until logged in) -->
-  <div id="user-profile" style="display: none;">
-    <h2>Welcome, <span id="user-email-display"></span></h2>
-    <p class="section-desc">You are currently logged in.</p>
-    <button type="button" class="btn-submit" onclick="handleLogout()" style="background-color: #DC2626;">Log Out</button>
-  </div>
-</section>
+  <script src="script.js"></script>
+</body>
+</html>
