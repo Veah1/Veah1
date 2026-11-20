@@ -1,5 +1,6 @@
 const SUPABASE_URL = 'https://ewusvjnpttqwjtdlrgtz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_ETEFERlUS6cfvsmfWjSPsg_K-GeTt6y'; 
+
 let dbClient = null;
 
 if (window.supabase && SUPABASE_URL && SUPABASE_URL !== 'YOUR_MAIN_SUPABASE_URL_HERE') {
@@ -17,6 +18,31 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// Tab Switching Logic (Fixes the switchTab is not defined error)
+window.switchTab = function(targetTabId, targetBtnId) {
+  // Hide all sections
+  document.querySelectorAll('.tab-content').forEach(section => {
+    section.classList.remove('active');
+  });
+
+  // Remove active class from all nav buttons
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.remove('active');
+    btn.setAttribute('aria-selected', 'false');
+  });
+
+  // Show target section & activate button
+  const targetSection = document.getElementById(targetTabId);
+  const targetBtn = document.getElementById(targetBtnId);
+
+  if (targetSection) targetSection.classList.add('active');
+  if (targetBtn) {
+    targetBtn.classList.add('active');
+    targetBtn.setAttribute('aria-selected', 'true');
+  }
+};
+
+// Form Submission Handler
 window.handleFormSubmit = async function(event, type, alertId) {
   event.preventDefault();
 
@@ -108,23 +134,13 @@ window.handleSignUp = async function(event) {
   const password = document.getElementById('signup-password').value;
   const alertBox = document.getElementById('signup-alert');
 
-  const { error } = await dbClient.auth.signUp({ 
-    email, 
-    password,
-    options: {
-      emailRedirectTo: window.location.origin
-    }
-  });
-
+  const { error } = await dbClient.auth.signUp({ email, password });
   if (error) {
     alert('Sign up error: ' + error.message);
     return;
   }
 
-  if (alertBox) {
-    alertBox.textContent = 'Account created! Please check your email inbox to confirm your registration before logging in.';
-    alertBox.style.display = 'block';
-  }
+  if (alertBox) alertBox.style.display = 'block';
   event.target.reset();
 };
 
