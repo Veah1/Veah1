@@ -172,13 +172,15 @@ margin: 0.25rem 0;
 .bed-limited { color: var(--warning) !important; }
 .bed-full { color: var(--danger) !important; }
 
+/* CRITICAL: Tab Visibility Handling */
 .tab-content {
-display: none;
+display: none !important;
 background: var(--card-bg) !important;
 padding: 1.5rem;
 border-radius: 8px;
 border: 1px solid var(--border) !important;
 box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+margin-top: 1rem;
 }
 
 .tab-content.active {
