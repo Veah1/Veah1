@@ -49,15 +49,17 @@ window.handleFormSubmit = async function(event, type, alertId) {
   const alertBox = document.getElementById(alertId);
   const reqId = 'REQ-' + Math.floor(1000 + Math.random() * 9000);
   
-  let category, details, locationOrFacility;
+  let category, details, locationOrFacility, urgencyVal;
   if (type === 'Public Outreach Request') {
     locationOrFacility = document.getElementById('location').value;
     category = document.getElementById('primary-need').value;
     details = document.getElementById('description').value;
+    urgencyVal = document.getElementById('urgency-level') ? document.getElementById('urgency-level').value : 'Standard';
   } else {
     locationOrFacility = document.getElementById('shelter-name').value + ' (' + document.getElementById('staff-role').value + ')';
     category = document.getElementById('request-type').value;
     details = document.getElementById('details').value;
+    urgencyVal = document.getElementById('shelter-urgency') ? document.getElementById('shelter-urgency').value : 'Standard';
   }
 
   if (dbClient) {
@@ -78,12 +80,66 @@ window.handleFormSubmit = async function(event, type, alertId) {
     }
   }
 
+  // Prepend new card directly into UI tracker list
+  const trackerList = document.getElementById('tracker-list');
+  if (trackerList) {
+    const isHigh = urgencyVal && urgencyVal.includes('High');
+    const badgeUrgent = isHigh ? '<span class="badge badge-urgent">High Urgency</span>' : '';
+    
+    const newCard = document.createElement('div');
+    newCard.className = 'status-card';
+    newCard.setAttribute('data-status', 'badge-pending');
+    newCard.innerHTML = `
+      <div class="status-header">
+        <span class="status-id">${reqId}</span>
+        <div style="display:flex; gap:0.4rem;">
+          ${badgeUrgent}
+          <span class="badge badge-pending">Pending Review</span>
+        </div>
+      </div>
+      <strong class="card-title">${type} (${category})</strong>
+      <p class="card-sub">Location/Facility: ${locationOrFacility}</p>
+      <p class="card-meta"><em>Details: ${details}</em></p>
+    `;
+    trackerList.prepend(newCard);
+  }
+
   if (alertBox) alertBox.style.display = 'block';
   event.target.reset();
 
   setTimeout(() => {
     if (alertBox) alertBox.style.display = 'none';
   }, 4000);
+};
+
+/* Tracker Live Filter and Search */
+let currentFilter = 'all';
+
+window.setFilter = function(filterVal, btnEl) {
+  currentFilter = filterVal;
+  document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+  filterTracker();
+};
+
+window.filterTracker = function() {
+  const searchInput = document.getElementById('tracker-search');
+  const query = (searchInput ? searchInput.value : '').toLowerCase();
+  const cards = document.querySelectorAll('#tracker-list .status-card');
+
+  cards.forEach(card => {
+    const cardText = card.textContent.toLowerCase();
+    const cardStatus = card.getAttribute('data-status') || '';
+    
+    const matchesSearch = cardText.includes(query);
+    const matchesFilter = (currentFilter === 'all') || cardStatus.includes(currentFilter);
+
+    if (matchesSearch && matchesFilter) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
 };
 
 // Fetch Requests for Status Tracker
@@ -109,6 +165,7 @@ async function fetchRequests() {
 
     const newCard = document.createElement('div');
     newCard.className = 'status-card';
+    newCard.setAttribute('data-status', badgeClass);
     newCard.innerHTML = `
       <div class="status-header">
         <span class="status-id">${req.request_id}</span>
